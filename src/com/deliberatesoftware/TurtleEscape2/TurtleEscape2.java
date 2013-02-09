@@ -32,10 +32,13 @@ public class TurtleEscape2 extends Game {
         spriteFont = new SpriteBatch();
 
         // create the raindrops array and spawn the first raindrop
-        font = new BitmapFont();
+        //font = new BitmapFont();
         currentHealth = 20;
         listener = new MyGestureListener();
         Gdx.input.setInputProcessor(new GestureDetector(listener));
+
+        font = new BitmapFont(Gdx.files.internal("test.fnt"),
+                Gdx.files.internal("test.png"), false);
     }
 
     private int rotation = 1;
@@ -45,7 +48,7 @@ public class TurtleEscape2 extends Game {
         // arguments to glClearColor are the red, green
         // blue and alpha component in the range [0,1]
         // of the color to be used to clear the screen.
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 1);
         Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
         // tell the camera to update its matrices.
@@ -83,11 +86,18 @@ public class TurtleEscape2 extends Game {
             }
         }
         if (listener.hadFling) {
-            camera.rotate(180);
+            //camera.unproject(listener.lastFling);
+            camera.rotate(lastRotate * -1);
+            if (listener.lastFling.y < 0) {
+                camera.rotate(180);
+                lastRotate = 180;
+            } else {
+                lastRotate = 0;
+            }
             listener.hadFling = false;
         }
     }
-
+        private int lastRotate = 0;
 
     @Override
     public void dispose() {
