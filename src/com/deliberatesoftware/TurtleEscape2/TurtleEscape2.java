@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
@@ -17,6 +18,7 @@ public class TurtleEscape2 extends Game {
     OrthographicCamera camera;
     private BitmapFont font;
     private int currentHealth = 20;
+    private MyGestureListener listener;
 
     @Override
     public void create() {
@@ -32,6 +34,8 @@ public class TurtleEscape2 extends Game {
         // create the raindrops array and spawn the first raindrop
         font = new BitmapFont();
         currentHealth = 20;
+        listener = new MyGestureListener();
+        Gdx.input.setInputProcessor(new GestureDetector(listener));
     }
 
     private int rotation = 1;
@@ -71,16 +75,16 @@ public class TurtleEscape2 extends Game {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
             if (touchPos.y <= 400) {
-                rotation--;
-                camera.rotate(rotation);
                 if (currentHealth > 0) {
                     currentHealth--;
                 }
             } else {
-                rotation++;
-                camera.rotate(rotation);
                 currentHealth++;
             }
+        }
+        if (listener.hadFling) {
+            camera.rotate(180);
+            listener.hadFling = false;
         }
     }
 
