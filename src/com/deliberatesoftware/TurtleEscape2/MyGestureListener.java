@@ -8,6 +8,9 @@ public class MyGestureListener implements GestureDetector.GestureListener {
     public Vector3 lastFling;
     public boolean hadFling = false;
 
+    public Vector3 lastTap;
+    public boolean hadTap = false;
+
     @Override
     public boolean touchDown(float x, float y, int pointer, int button) {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
@@ -15,7 +18,9 @@ public class MyGestureListener implements GestureDetector.GestureListener {
 
     @Override
     public boolean tap(float x, float y, int count, int button) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        hadTap = true;
+        lastTap = new Vector3(x, y, 0);
+        return true; //was processed
     }
 
     @Override
