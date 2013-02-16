@@ -24,13 +24,13 @@ public class TurtleEscape2 extends Game {
     OrthographicCamera camera;
     private BitmapFont font;
     private MyGestureListener listener;
-    private Texture healthImage;
+    private Texture bgColor;
     private Map<Integer, Texture> numImages = new HashMap<Integer, Texture>();
     private Texture minus;
     private Texture plus;
     Rectangle topButton;
     Rectangle bottomButton;
-    int numPlayers = 2;
+    int numPlayers = 4;
     private Map<Integer, Player> Players = new HashMap<Integer, Player>();
     private Map<Integer, Map<Integer, Rectangle>> Boards = new HashMap<Integer, Map<Integer, Rectangle>>();
 
@@ -39,7 +39,7 @@ public class TurtleEscape2 extends Game {
         // load the images for the droplet and the bucket, 48x48 pixels each
         dropImage = new Texture(Gdx.files.internal("drop.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
-        healthImage = new Texture(Gdx.files.internal("health.png"));
+        bgColor = new Texture(Gdx.files.internal("health.png"));
         for (int i = 0; i <= 24; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
         }
@@ -61,10 +61,21 @@ public class TurtleEscape2 extends Game {
         bottomButton = new Rectangle(0, heightmid-75, 75,75);
 
 
+        //two player
         HashMap<Integer, Rectangle> twoPlayerBoard = new HashMap<Integer, Rectangle>();
         twoPlayerBoard.put(1, new Rectangle(0, heightmid, 480, heightmid));
         twoPlayerBoard.put(2, new Rectangle(0, 0, 480, heightmid));
         Boards.put(2, twoPlayerBoard);
+
+        //four player
+        HashMap<Integer, Rectangle> fourPlayerBoard = new HashMap<Integer, Rectangle>();
+        fourPlayerBoard.put(1, new Rectangle(0, heightmid, widthmid, heightmid));
+        fourPlayerBoard.put(2, new Rectangle(widthmid, heightmid, widthmid, heightmid));
+        fourPlayerBoard.put(3, new Rectangle(0, 0, widthmid, heightmid));
+        fourPlayerBoard.put(4, new Rectangle(widthmid, 0, widthmid, heightmid));
+        Boards.put(4, fourPlayerBoard);
+
+        // 8 player
 
         for (int i = 1; i <= numPlayers; i++) {
             Player player = new Player(Boards.get(numPlayers).get(i));
@@ -125,13 +136,23 @@ public class TurtleEscape2 extends Game {
         float percent = getHealthPercent(player.Health);
         batch.setColor(0, 1, 0, percent);
         Rectangle pos = player.Position;
-        batch.draw(healthImage, pos.x, pos.y, pos.width, pos.height);
+        batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
         batch.setColor(0, 0, 0, 1);
+
         Sprite num = new Sprite(numImages.get(player.Health));
-        num.setPosition(pos.x, pos.y);
-        num.setSize(pos.width, pos.height);
-        int xCenter = (int) (((pos.width)/2));
-        int yCenter = (int) (((pos.height)/2));
+        int xCenter;
+        int yCenter;
+        if (pos.width > pos.height) {
+            num.setPosition(pos.x + ((pos.width/2 - pos.height/2)), pos.y);
+            num.setSize(pos.height, pos.height);
+            xCenter = (int) (((pos.height)/2));
+            yCenter = (int) (((pos.height)/2));
+        } else {
+            num.setPosition(pos.x, pos.y + ((pos.height/2 - pos.width/2)));
+            num.setSize(pos.width, pos.width);
+            xCenter = (int) (((pos.width)/2));
+            yCenter = (int) (((pos.width)/2));
+        }
         num.setOrigin(xCenter, yCenter); // pos.Center
         num.setRotation(getRotation(currentDirection));
         num.draw(batch);
@@ -141,7 +162,7 @@ public class TurtleEscape2 extends Game {
     private void drawTop(int health) {
         float percent = getHealthPercent(health);
         batch.setColor(0, 1, 0, percent);
-        batch.draw(healthImage, 0, heightmid, 480, heightmid);
+        batch.draw(bgColor, 0, heightmid, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
         Sprite num = new Sprite(numImages.get(health));
         num.setPosition(0, heightmid);
@@ -158,7 +179,7 @@ public class TurtleEscape2 extends Game {
     private void drawBottem(int health) {
         float percent = getHealthPercent(health);
         batch.setColor(0, 1, 0, percent);
-        batch.draw(healthImage, 0, 0, 480, heightmid);
+        batch.draw(bgColor, 0, 0, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
         Sprite num = new Sprite(numImages.get(health));
         num.setPosition(0, 0);
