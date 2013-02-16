@@ -2,16 +2,16 @@ package com.deliberatesoftware.TurtleEscape2;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
-
-import javax.swing.text.html.HTML;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TurtleEscape2 extends Game {
     Texture dropImage;
@@ -23,6 +23,9 @@ public class TurtleEscape2 extends Game {
     private int Player2Health = 20;
     private MyGestureListener listener;
     private Texture healthImage;
+    private Map<Integer, Texture> numImages = new HashMap<Integer, Texture>();
+    private Texture minus;
+    private Texture plus;
 
     @Override
     public void create() {
@@ -30,7 +33,11 @@ public class TurtleEscape2 extends Game {
         dropImage = new Texture(Gdx.files.internal("drop.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         healthImage = new Texture(Gdx.files.internal("health.png"));
-
+        for (int i = 0; i <= 20; i ++){
+            numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
+        }
+        plus = new Texture(Gdx.files.internal("numbers/+.png"));
+        minus = new Texture(Gdx.files.internal("numbers/+.png"));
         // create the camera and the SpriteBatch
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 480, 800);
@@ -44,6 +51,7 @@ public class TurtleEscape2 extends Game {
         font = new BitmapFont(Gdx.files.internal("test.fnt"),
                 Gdx.files.internal("test.png"), false);
     }
+
 
     private int widthmid = 480/2;
     private int heightmid = 800/2;
@@ -76,6 +84,10 @@ public class TurtleEscape2 extends Game {
             drawTop(Player1Health);
             drawBottem(Player2Health);
         }
+        Rectangle topButton = new Rectangle(0, (heightmid*2)-75, 75,75);
+        batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
+        Rectangle bottomButton = new Rectangle(0, heightmid-75, 75,75);
+        batch.draw(plus, bottomButton.x, bottomButton.y, bottomButton.height, bottomButton.width);
         batch.end();
 
         // process user input
@@ -96,12 +108,21 @@ public class TurtleEscape2 extends Game {
             listener.hadTap = false;
             //camera.unproject(touchPos);
             if (touchPos.y <= heightmid) {
-                if (Player1Health > 0) {
-                    Player1Health--;
+                camera.unproject(touchPos);
+                if(topButton.contains(touchPos.x, touchPos.y)) {
+                    Player1Health++;
+                } else{
+                    if (Player1Health > 0) {
+                        Player1Health--;
+                    }
                 }
             } else {
-                if (Player2Health > 0) {
-                    Player2Health--;
+                if(bottomButton.contains(touchPos.x, touchPos.y)) {
+                    Player2Health++;
+                } else{
+                    if (Player2Health > 0) {
+                        Player2Health--;
+                    }
                 }
             }
         }
@@ -112,7 +133,7 @@ public class TurtleEscape2 extends Game {
         batch.setColor(0, 1, 0, percent);
         batch.draw(healthImage, 0, heightmid, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
-        font.draw(batch, Integer.toString(health), widthmid, (float) (heightmid * 1.5));
+        batch.draw(numImages.get(health), 0, heightmid, 480, heightmid);
     }
 
     private float getHealthPercent(int health) {
@@ -125,7 +146,7 @@ public class TurtleEscape2 extends Game {
         batch.setColor(0, 1, 0, percent);
         batch.draw(healthImage, 0, 0, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
-        font.draw(batch, Integer.toString(health), widthmid, heightmid/2);
+        batch.draw(numImages.get(health),0,0, 480, heightmid);
     }
 
     @Override
@@ -136,5 +157,10 @@ public class TurtleEscape2 extends Game {
         //dropSound.dispose();
         //rainMusic.dispose();
         batch.dispose();
+        for(int i = 0; i <= 20; i++){
+            numImages.get(i).dispose();
+        }
+        plus.dispose();
+        minus.dispose();
     }
 }
