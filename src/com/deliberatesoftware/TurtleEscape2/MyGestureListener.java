@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public class MyGestureListener implements GestureDetector.GestureListener {
-    public Vector3 lastFling;
+    public Vector3 currentFling;
     public boolean hadFling = false;
 
     public Vector3 lastTap;
@@ -31,7 +31,7 @@ public class MyGestureListener implements GestureDetector.GestureListener {
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
         hadFling = true;
-        lastFling = new Vector3(velocityX, velocityY, 0);
+        currentFling = new Vector3(velocityX, velocityY, 0);
         return true; //was processed
     }
 

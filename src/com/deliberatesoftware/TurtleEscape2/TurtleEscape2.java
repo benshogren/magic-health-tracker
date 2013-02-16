@@ -60,16 +60,22 @@ public class TurtleEscape2 extends Game {
 
     private int widthmid = 480/2;
     private int heightmid = 800/2;
-    private boolean upsideDown = false;
+    private Direction currentDirection = Direction.Bottom;
     private int lastRotate = 0;
-
+    private int pulse = 0;
+    public enum Direction{
+        Right,
+        Left,
+        Top,
+        Bottom
+    }
     @Override
     public void render() {
         // clear the screen with a dark blue color. The
         // arguments to glClearColor are the red, green
         // blue and alpha component in the range [0,1]
         // of the color to be used to clear the screen.
-        Gdx.gl.glClearColor(0.3f, 0.0f, 0.0f, 1);
+        Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1);
         //Gdx.gl.glClearColor(1.0f, 1.0f, 1.0f, 1);
         Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 
@@ -87,11 +93,23 @@ public class TurtleEscape2 extends Game {
 
         // process user input
         if (listener.hadFling) {
-            camera.unproject(listener.lastFling);
-            if (listener.lastFling.y < 0) {
-                upsideDown = true;
+            float x =listener.currentFling.x;
+            float y =listener.currentFling.y;
+            float absX = Math.abs(x);
+            float absY = Math.abs(y);
+
+            if (absY > absX) {
+                if (y > 0){
+                   currentDirection = Direction.Top;
+                } else {
+                    currentDirection = Direction.Bottom;
+                }
             } else {
-                upsideDown = false;
+                if (x > 0){
+                    currentDirection = Direction.Right;
+                } else {
+                    currentDirection = Direction.Left;
+                }
             }
             listener.hadFling = false;
         } else if (listener.hadTap) {
@@ -123,15 +141,27 @@ public class TurtleEscape2 extends Game {
         batch.setColor(0, 1, 0, percent);
         batch.draw(healthImage, 0, heightmid, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
-        Sprite num = new Sprite(numImages.get(health), 480, heightmid);
+        Sprite num = new Sprite(numImages.get(health));
         num.setPosition(0, heightmid);
-        if (upsideDown) {
-            num.rotate(180);
-        }
+        num.setSize(480, heightmid);
+        num.setOrigin(widthmid, heightmid/2);
+        num.setRotation(getRotation());
         num.draw(batch);
         batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
     }
-
+    private int getRotation(){
+        switch(currentDirection){
+            case Top:
+                return 180;
+            case Bottom:
+                return 0;
+            case Left:
+                return -90;
+            case Right:
+                return 90;
+        }
+        return 0;
+    }
     private float getHealthPercent(int health) {
         //return 0.95f;
         return (health*5)/100f;
@@ -142,12 +172,11 @@ public class TurtleEscape2 extends Game {
         batch.setColor(0, 1, 0, percent);
         batch.draw(healthImage, 0, 0, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
-        //batch.draw(numImages.get(health), 0, 0, 480, heightmid);
-        Sprite num = new Sprite(numImages.get(health), 480, heightmid);
+        Sprite num = new Sprite(numImages.get(health));
         num.setPosition(0, 0);
-        if (upsideDown) {
-            num.rotate(180);
-        }
+        num.setOrigin(widthmid, heightmid/2);
+        num.setSize(480, heightmid);
+        num.setRotation(getRotation());
         num.draw(batch);
         batch.draw(plus, bottomButton.x, bottomButton.y, bottomButton.height, bottomButton.width);
     }
