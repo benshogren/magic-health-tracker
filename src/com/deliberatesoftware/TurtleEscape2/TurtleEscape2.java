@@ -60,14 +60,18 @@ public class TurtleEscape2 extends Game {
 
     private int widthmid = 480/2;
     private int heightmid = 800/2;
-    private Direction currentDirection = Direction.Bottom;
+    private Direction currentDirection = Direction.South;
     private int lastRotate = 0;
     private int pulse = 0;
     public enum Direction{
-        Right,
-        Left,
-        Top,
-        Bottom
+        East,
+        West,
+        North,
+        South,
+        SouthEast,
+        SouthWest,
+        NorthWest,
+        NorthEast
     }
     @Override
     public void render() {
@@ -93,24 +97,7 @@ public class TurtleEscape2 extends Game {
 
         // process user input
         if (listener.hadFling) {
-            float x =listener.currentFling.x;
-            float y =listener.currentFling.y;
-            float absX = Math.abs(x);
-            float absY = Math.abs(y);
-
-            if (absY > absX) {
-                if (y > 0){
-                   currentDirection = Direction.Top;
-                } else {
-                    currentDirection = Direction.Bottom;
-                }
-            } else {
-                if (x > 0){
-                    currentDirection = Direction.Right;
-                } else {
-                    currentDirection = Direction.Left;
-                }
-            }
+            setDirection();
             listener.hadFling = false;
         } else if (listener.hadTap) {
             Vector3 touchPos = listener.lastTap;
@@ -136,6 +123,51 @@ public class TurtleEscape2 extends Game {
         }
     }
 
+    private void setDirection() {
+        float x = listener.currentFling.x;
+        float y = listener.currentFling.y;
+        float absX = Math.abs(x);
+        float absY = Math.abs(y);
+
+        if (absY > absX) {
+            if (y < 0){
+                if(absY/2 > absX) {
+                    currentDirection = Direction.North;
+                } else if(x > 0) {
+                    currentDirection = Direction.NorthWest;
+                } else {
+                    currentDirection = Direction.NorthEast;
+                }
+            } else {
+                if(absY/2 > absX) {
+                    currentDirection = Direction.South;
+                } else if(x > 0) {
+                    currentDirection = Direction.SouthEast;
+                } else {
+                    currentDirection = Direction.SouthWest;
+                }
+            }
+        } else {
+            if (x > 0){
+                if(absX/2 > absY) {
+                    currentDirection = Direction.East;
+                } else if(y < 0) {
+                    currentDirection = Direction.NorthWest;
+                } else {
+                    currentDirection = Direction.SouthEast;
+                }
+            } else {
+                if(absX/2 > absY) {
+                    currentDirection = Direction.West;
+                } else if(y < 0) {
+                    currentDirection = Direction.NorthEast;
+                } else {
+                    currentDirection = Direction.SouthWest;
+                }
+            }
+        }
+    }
+
     private void drawTop(int health) {
         float percent = getHealthPercent(health);
         batch.setColor(0, 1, 0, percent);
@@ -144,21 +176,29 @@ public class TurtleEscape2 extends Game {
         Sprite num = new Sprite(numImages.get(health));
         num.setPosition(0, heightmid);
         num.setSize(480, heightmid);
-        num.setOrigin(widthmid, heightmid/2);
+        num.setOrigin(widthmid, heightmid / 2);
         num.setRotation(getRotation());
         num.draw(batch);
         batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
     }
     private int getRotation(){
         switch(currentDirection){
-            case Top:
+            case North:
                 return 180;
-            case Bottom:
+            case South:
                 return 0;
-            case Left:
+            case West:
                 return -90;
-            case Right:
+            case East:
                 return 90;
+            case SouthWest:
+                return -45;
+            case SouthEast:
+                return 45;
+            case NorthWest:
+                return 135;
+            case NorthEast:
+                return 215;
         }
         return 0;
     }
