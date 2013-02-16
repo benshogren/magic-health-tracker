@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Rectangle;
@@ -26,6 +27,8 @@ public class TurtleEscape2 extends Game {
     private Map<Integer, Texture> numImages = new HashMap<Integer, Texture>();
     private Texture minus;
     private Texture plus;
+    Rectangle topButton;
+    Rectangle bottomButton;
 
     @Override
     public void create() {
@@ -33,7 +36,7 @@ public class TurtleEscape2 extends Game {
         dropImage = new Texture(Gdx.files.internal("drop.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         healthImage = new Texture(Gdx.files.internal("health.png"));
-        for (int i = 0; i <= 20; i ++){
+        for (int i = 0; i <= 24; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
         }
         plus = new Texture(Gdx.files.internal("numbers/+.png"));
@@ -50,6 +53,8 @@ public class TurtleEscape2 extends Game {
 
         font = new BitmapFont(Gdx.files.internal("test.fnt"),
                 Gdx.files.internal("test.png"), false);
+        topButton = new Rectangle(0, (heightmid*2)-75, 75,75);
+        bottomButton = new Rectangle(0, heightmid-75, 75,75);
     }
 
 
@@ -76,40 +81,25 @@ public class TurtleEscape2 extends Game {
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        //font.draw(batch, "Health", widthmid, heightmid);
-        if(upsideDown) {
-            drawTop(Player2Health);
-            drawBottem(Player1Health);
-        } else {
-            drawTop(Player1Health);
-            drawBottem(Player2Health);
-        }
-        Rectangle topButton = new Rectangle(0, (heightmid*2)-75, 75,75);
-        batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
-        Rectangle bottomButton = new Rectangle(0, heightmid-75, 75,75);
-        batch.draw(plus, bottomButton.x, bottomButton.y, bottomButton.height, bottomButton.width);
+        drawTop(Player1Health);
+        drawBottem(Player2Health);
         batch.end();
 
         // process user input
         if (listener.hadFling) {
-            //camera.unproject(listener.lastFling);
-            camera.rotate(lastRotate * -1);
+            camera.unproject(listener.lastFling);
             if (listener.lastFling.y < 0) {
-                camera.rotate(180);
-                lastRotate = 180;
                 upsideDown = true;
             } else {
-                lastRotate = 0;
                 upsideDown = false;
             }
             listener.hadFling = false;
         } else if (listener.hadTap) {
             Vector3 touchPos = listener.lastTap;
             listener.hadTap = false;
-            //camera.unproject(touchPos);
-            if (touchPos.y <= heightmid) {
-                camera.unproject(touchPos);
-                if(topButton.contains(touchPos.x, touchPos.y)) {
+            camera.unproject(touchPos);
+            if (touchPos.y > heightmid) { //player 1
+                if(topButton.contains(touchPos.x, touchPos.y) && Player1Health < 24) {
                     Player1Health++;
                 } else{
                     if (Player1Health > 0) {
@@ -117,7 +107,7 @@ public class TurtleEscape2 extends Game {
                     }
                 }
             } else {
-                if(bottomButton.contains(touchPos.x, touchPos.y)) {
+                if(bottomButton.contains(touchPos.x, touchPos.y) && Player2Health < 24) {
                     Player2Health++;
                 } else{
                     if (Player2Health > 0) {
@@ -133,7 +123,13 @@ public class TurtleEscape2 extends Game {
         batch.setColor(0, 1, 0, percent);
         batch.draw(healthImage, 0, heightmid, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
-        batch.draw(numImages.get(health), 0, heightmid, 480, heightmid);
+        Sprite num = new Sprite(numImages.get(health), 480, heightmid);
+        num.setPosition(0, heightmid);
+        if (upsideDown) {
+            num.rotate(180);
+        }
+        num.draw(batch);
+        batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
     }
 
     private float getHealthPercent(int health) {
@@ -146,7 +142,14 @@ public class TurtleEscape2 extends Game {
         batch.setColor(0, 1, 0, percent);
         batch.draw(healthImage, 0, 0, 480, heightmid);
         batch.setColor(0, 0, 0, 1);
-        batch.draw(numImages.get(health),0,0, 480, heightmid);
+        //batch.draw(numImages.get(health), 0, 0, 480, heightmid);
+        Sprite num = new Sprite(numImages.get(health), 480, heightmid);
+        num.setPosition(0, 0);
+        if (upsideDown) {
+            num.rotate(180);
+        }
+        num.draw(batch);
+        batch.draw(plus, bottomButton.x, bottomButton.y, bottomButton.height, bottomButton.width);
     }
 
     @Override
@@ -157,7 +160,7 @@ public class TurtleEscape2 extends Game {
         //dropSound.dispose();
         //rainMusic.dispose();
         batch.dispose();
-        for(int i = 0; i <= 20; i++){
+        for(int i = 0; i <= 24; i++){
             numImages.get(i).dispose();
         }
         plus.dispose();
