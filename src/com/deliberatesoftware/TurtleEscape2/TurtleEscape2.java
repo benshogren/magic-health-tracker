@@ -23,8 +23,6 @@ public class TurtleEscape2 extends Game {
     SpriteBatch batch;
     OrthographicCamera camera;
     private BitmapFont font;
-    private int Player1Health = 18;
-    private int Player2Health = 20;
     private MyGestureListener listener;
     private Texture healthImage;
     private Map<Integer, Texture> numImages = new HashMap<Integer, Texture>();
@@ -32,6 +30,9 @@ public class TurtleEscape2 extends Game {
     private Texture plus;
     Rectangle topButton;
     Rectangle bottomButton;
+    int numPlayers = 2;
+    private Map<Integer, Player> Players = new HashMap<Integer, Player>();
+    private Map<Integer, Map<Integer, Rectangle>> Boards = new HashMap<Integer, Map<Integer, Rectangle>>();
 
     @Override
     public void create() {
@@ -58,6 +59,18 @@ public class TurtleEscape2 extends Game {
                 Gdx.files.internal("test.png"), false);
         topButton = new Rectangle(0, (heightmid*2)-75, 75,75);
         bottomButton = new Rectangle(0, heightmid-75, 75,75);
+
+
+        HashMap<Integer, Rectangle> twoPlayerBoard = new HashMap<Integer, Rectangle>();
+        twoPlayerBoard.put(1, new Rectangle(0, heightmid, 480, heightmid));
+        twoPlayerBoard.put(2, new Rectangle(0, 0, 480, heightmid));
+        Boards.put(2, twoPlayerBoard);
+
+        for (int i = 1; i <= numPlayers; i++) {
+            Player player = new Player(Boards.get(numPlayers).get(i));
+            Players.put(i, player);
+        }
+
     }
 
 
@@ -84,8 +97,9 @@ public class TurtleEscape2 extends Game {
         batch.setProjectionMatrix(camera.combined);
 
         batch.begin();
-        drawTop(Player1Health);
-        drawBottem(Player2Health);
+        for(int i = 1; i<=numPlayers;i++) {
+            drawPlayer(Players.get(i));
+        }
         batch.end();
 
         // process user input
@@ -96,24 +110,32 @@ public class TurtleEscape2 extends Game {
             Vector3 touchPos = listener.lastTap;
             listener.hadTap = false;
             camera.unproject(touchPos);
-            if (touchPos.y > heightmid) { //player 1
-                if(topButton.contains(touchPos.x, touchPos.y) && Player1Health < 24) {
-                    Player1Health++;
-                } else{
-                    if (Player1Health > 0) {
-                        Player1Health--;
-                    }
-                }
-            } else {
-                if(bottomButton.contains(touchPos.x, touchPos.y) && Player2Health < 24) {
-                    Player2Health++;
-                } else{
-                    if (Player2Health > 0) {
-                        Player2Health--;
+            for(int i=1;i<=numPlayers;i++) {
+                Player p = Players.get(i);
+                if (p.Position.contains(touchPos.x, touchPos.y)) {
+                    if(p.Health > 0) {
+                        p.Health--;
                     }
                 }
             }
         }
+    }
+
+    private void drawPlayer(Player player) {
+        float percent = getHealthPercent(player.Health);
+        batch.setColor(0, 1, 0, percent);
+        Rectangle pos = player.Position;
+        batch.draw(healthImage, pos.x, pos.y, pos.width, pos.height);
+        batch.setColor(0, 0, 0, 1);
+        Sprite num = new Sprite(numImages.get(player.Health));
+        num.setPosition(pos.x, pos.y);
+        num.setSize(pos.width, pos.height);
+        int xCenter = (int) (((pos.width)/2));
+        int yCenter = (int) (((pos.height)/2));
+        num.setOrigin(xCenter, yCenter); // pos.Center
+        num.setRotation(getRotation(currentDirection));
+        num.draw(batch);
+        //batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
     }
 
     private void drawTop(int health) {
