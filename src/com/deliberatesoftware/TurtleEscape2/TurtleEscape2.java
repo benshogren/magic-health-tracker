@@ -2,7 +2,6 @@ package com.deliberatesoftware.TurtleEscape2;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -19,6 +18,7 @@ import static com.deliberatesoftware.TurtleEscape2.Rotator.getRotation;
 import static com.deliberatesoftware.TurtleEscape2.Rotator.convertToDirection;
 
 public class TurtleEscape2 extends Game {
+    private Board board;
     Texture dropImage;
     Texture bucketImage;
     SpriteBatch batch;
@@ -33,6 +33,10 @@ public class TurtleEscape2 extends Game {
     int numPlayers = 4;
     private Map<Integer, Player> Players = new HashMap<Integer, Player>();
     private Map<Integer, Map<Integer, Rectangle>> Boards = new HashMap<Integer, Map<Integer, Rectangle>>();
+    private int widthmid = 480/2;
+    private int heightmid = 800/2;
+    private Rotator.Direction currentDirection = Rotator.Direction.South;
+    private int pulse = 0;
 
     @Override
     public void create() {
@@ -60,21 +64,9 @@ public class TurtleEscape2 extends Game {
         bottomButton = new Rectangle(0, heightmid-75, 75,75);
 
 
-        //two player
-        HashMap<Integer, Rectangle> twoPlayerBoard = new HashMap<Integer, Rectangle>();
-        twoPlayerBoard.put(1, new Rectangle(0, heightmid, 480, heightmid));
-        twoPlayerBoard.put(2, new Rectangle(0, 0, 480, heightmid));
-        Boards.put(2, twoPlayerBoard);
-
-        //four player
-        HashMap<Integer, Rectangle> fourPlayerBoard = new HashMap<Integer, Rectangle>();
-        fourPlayerBoard.put(1, new Rectangle(0, heightmid, widthmid, heightmid));
-        fourPlayerBoard.put(2, new Rectangle(widthmid, heightmid, widthmid, heightmid));
-        fourPlayerBoard.put(3, new Rectangle(0, 0, widthmid, heightmid));
-        fourPlayerBoard.put(4, new Rectangle(widthmid, 0, widthmid, heightmid));
-        Boards.put(4, fourPlayerBoard);
-
-        // 8 player
+        board = new Board(widthmid, heightmid);
+        Boards.put(2, board.makeTwoPlayerMap());
+        Boards.put(4, board.makeFourPlayerBoard());
 
         for (int i = 1; i <= numPlayers; i++) {
             Player player = new Player(Boards.get(numPlayers).get(i));
@@ -82,12 +74,6 @@ public class TurtleEscape2 extends Game {
         }
     }
 
-
-    private int widthmid = 480/2;
-    private int heightmid = 800/2;
-    private Rotator.Direction currentDirection = Rotator.Direction.South;
-    private int lastRotate = 0;
-    private int pulse = 0;
     @Override
     public void render() {
         // clear the screen with a dark blue color. The
