@@ -12,9 +12,11 @@ import com.badlogic.gdx.math.Rectangle;
 public class Player {
     public int Health = 20;
     public Rectangle Position;
+    public Rectangle PlusPosition;
 
     public Player(Rectangle pos) {
-        Position =pos;
+        Position = pos;
+        PlusPosition = new Rectangle(pos.x, (pos.y+pos.height)-75, 75, 75);
     }
 
 }

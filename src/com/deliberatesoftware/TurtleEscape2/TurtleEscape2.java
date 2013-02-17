@@ -2,6 +2,7 @@ package com.deliberatesoftware.TurtleEscape2;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,7 +27,6 @@ public class TurtleEscape2 extends Game {
     private MyGestureListener listener;
     private Texture bgColor;
     private Map<Integer, Texture> numImages = new HashMap<Integer, Texture>();
-    private Texture minus;
     private Texture plus;
     Rectangle topButton;
     Rectangle bottomButton;
@@ -40,11 +40,10 @@ public class TurtleEscape2 extends Game {
         dropImage = new Texture(Gdx.files.internal("drop.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         bgColor = new Texture(Gdx.files.internal("health.png"));
-        for (int i = 0; i <= 24; i ++){
+        for (int i = 0; i <= 33; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
         }
         plus = new Texture(Gdx.files.internal("numbers/+.png"));
-        minus = new Texture(Gdx.files.internal("numbers/+.png"));
         // create the camera and the SpriteBatch
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 480, 800);
@@ -81,7 +80,6 @@ public class TurtleEscape2 extends Game {
             Player player = new Player(Boards.get(numPlayers).get(i));
             Players.put(i, player);
         }
-
     }
 
 
@@ -124,8 +122,21 @@ public class TurtleEscape2 extends Game {
             for(int i=1;i<=numPlayers;i++) {
                 Player p = Players.get(i);
                 if (p.Position.contains(touchPos.x, touchPos.y)) {
-                    if(p.Health > 0) {
-                        p.Health--;
+                    if (p.PlusPosition.contains(touchPos.x, touchPos.y)) {
+                        if(p.Health < 33) {
+                            p.Health++;
+                            Gdx.input.vibrate(75);
+                        }
+                    } else {
+                        if(p.Health > 0) {
+                            p.Health--;
+                            if (p.Health < 6) {
+                                long[] d = {0, 75, 75, 75};
+                                Gdx.input.vibrate(d, -1);
+                            } else {
+                                Gdx.input.vibrate(75);
+                            }
+                        }
                     }
                 }
             }
@@ -133,9 +144,9 @@ public class TurtleEscape2 extends Game {
     }
 
     private void drawPlayer(Player player) {
+        Rectangle pos = player.Position;
         float percent = getHealthPercent(player.Health);
         batch.setColor(0, 1, 0, percent);
-        Rectangle pos = player.Position;
         batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
         batch.setColor(0, 0, 0, 1);
 
@@ -156,38 +167,15 @@ public class TurtleEscape2 extends Game {
         num.setOrigin(xCenter, yCenter); // pos.Center
         num.setRotation(getRotation(currentDirection));
         num.draw(batch);
-        //batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
+        Rectangle plusR = player.PlusPosition;
+        batch.draw(plus, plusR.x, plusR.y, plusR.width, plusR.height);
     }
 
-    private void drawTop(int health) {
-        float percent = getHealthPercent(health);
-        batch.setColor(0, 1, 0, percent);
-        batch.draw(bgColor, 0, heightmid, 480, heightmid);
-        batch.setColor(0, 0, 0, 1);
-        Sprite num = new Sprite(numImages.get(health));
-        num.setPosition(0, heightmid);
-        num.setSize(480, heightmid);
-        num.setOrigin(widthmid, heightmid / 2);
-        num.setRotation(getRotation(currentDirection));
-        num.draw(batch);
-        batch.draw(plus, topButton.x, topButton.y, topButton.height, topButton.width);
-    }
     private float getHealthPercent(int health) {
+        if(health > 20){
+            return 1;
+        }
         return (health*5)/100f;
-    }
-
-    private void drawBottem(int health) {
-        float percent = getHealthPercent(health);
-        batch.setColor(0, 1, 0, percent);
-        batch.draw(bgColor, 0, 0, 480, heightmid);
-        batch.setColor(0, 0, 0, 1);
-        Sprite num = new Sprite(numImages.get(health));
-        num.setPosition(0, 0);
-        num.setOrigin(widthmid, heightmid/2);
-        num.setSize(480, heightmid);
-        num.setRotation(getRotation(currentDirection));
-        num.draw(batch);
-        batch.draw(plus, bottomButton.x, bottomButton.y, bottomButton.height, bottomButton.width);
     }
 
     @Override
@@ -198,10 +186,9 @@ public class TurtleEscape2 extends Game {
         //dropSound.dispose();
         //rainMusic.dispose();
         batch.dispose();
-        for(int i = 0; i <= 24; i++){
+        for(int i = 0; i <= 33; i++){
             numImages.get(i).dispose();
         }
         plus.dispose();
-        minus.dispose();
     }
 }
