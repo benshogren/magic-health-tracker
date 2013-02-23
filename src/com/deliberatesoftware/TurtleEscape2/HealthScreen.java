@@ -32,7 +32,7 @@ public class HealthScreen implements Screen {
     private Texture plus;
     Rectangle topButton;
     Rectangle bottomButton;
-    int numPlayers = 8;
+    int numPlayers = 0;
     private Map<Integer, Player> Players = new HashMap<Integer, Player>();
     private Map<Integer, Map<Integer, Rectangle>> Boards = new HashMap<Integer, Map<Integer, Rectangle>>();
     private int widthmid = 480/2;
@@ -40,8 +40,11 @@ public class HealthScreen implements Screen {
     private Rotator.Direction currentDirection = Rotator.Direction.South;
     private int pulse = 0;
     private TurtleEscape2 game;
-    public HealthScreen ( TurtleEscape2 game ) {
+    private Texture bg;
+
+    public HealthScreen ( TurtleEscape2 game, int gameSize ) {
         this.game = game;
+        this.numPlayers = gameSize;
     }
 
     @Override
@@ -50,6 +53,7 @@ public class HealthScreen implements Screen {
         dropImage = new Texture(Gdx.files.internal("drop.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         bgColor = new Texture(Gdx.files.internal("health.png"));
+        bg = new Texture(Gdx.files.internal("Untitled.png"));
         for (int i = 0; i <= 33; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
         }
@@ -70,9 +74,13 @@ public class HealthScreen implements Screen {
         bottomButton = new Rectangle(0, heightmid-75, 75,75);
 
         board = new Board(widthmid, heightmid);
+        Boards.put(1, board.makeOnePlayerMap());
         Boards.put(2, board.makeTwoPlayerMap());
+        Boards.put(3, board.makeFourPlayerMap());
         Boards.put(4, board.makeFourPlayerMap());
+        Boards.put(5, board.makeSixPlayerMap());
         Boards.put(6, board.makeSixPlayerMap());
+        Boards.put(7, board.makeEightPlayerMap());
         Boards.put(8, board.makeEightPlayerMap());
 
         for (int i = 1; i <= numPlayers; i++) {
@@ -141,7 +149,7 @@ public class HealthScreen implements Screen {
         float percent = getHealthPercent(player.Health);
         batch.setColor(0, 1, 0, percent);
         batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
-        batch.setColor(0, 0, 0, 1);
+        batch.setColor(1, 1, 1, 1);
 
         Sprite num = new Sprite(numImages.get(player.Health));
         int xCenter;
@@ -198,10 +206,11 @@ public class HealthScreen implements Screen {
         bucketImage.dispose();
         //dropSound.dispose();
         //rainMusic.dispose();
-        batch.dispose();
         for(int i = 0; i <= 33; i++){
             numImages.get(i).dispose();
         }
         plus.dispose();
+        bg.dispose();
+        batch.dispose();
     }
 }

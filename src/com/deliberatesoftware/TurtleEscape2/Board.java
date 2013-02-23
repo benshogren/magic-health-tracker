@@ -3,7 +3,6 @@ package com.deliberatesoftware.TurtleEscape2;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class Board {
 
@@ -19,10 +18,15 @@ public class Board {
         this.width = widthmid*2;
     }
 
+    HashMap<Integer, Rectangle> makeOnePlayerMap() {
+        HashMap<Integer, Rectangle> onePlayerBoard = new HashMap<Integer, Rectangle>();
+        onePlayerBoard.put(1, new Rectangle(0, 0, width, height));
+        return onePlayerBoard;
+    }
     HashMap<Integer, Rectangle> makeTwoPlayerMap() {
         HashMap<Integer, Rectangle> twoPlayerBoard = new HashMap<Integer, Rectangle>();
-        twoPlayerBoard.put(1, new Rectangle(0, heightMid, 480, heightMid));
-        twoPlayerBoard.put(2, new Rectangle(0, 0, 480, heightMid));
+        twoPlayerBoard.put(1, new Rectangle(0, heightMid, width, heightMid));
+        twoPlayerBoard.put(2, new Rectangle(0, 0, width, heightMid));
         return twoPlayerBoard;
     }
 
