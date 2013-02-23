@@ -30,7 +30,7 @@ public class TurtleEscape2 extends Game {
     private Texture plus;
     Rectangle topButton;
     Rectangle bottomButton;
-    int numPlayers = 4;
+    int numPlayers = 8;
     private Map<Integer, Player> Players = new HashMap<Integer, Player>();
     private Map<Integer, Map<Integer, Rectangle>> Boards = new HashMap<Integer, Map<Integer, Rectangle>>();
     private int widthmid = 480/2;
@@ -63,10 +63,11 @@ public class TurtleEscape2 extends Game {
         topButton = new Rectangle(0, (heightmid*2)-75, 75,75);
         bottomButton = new Rectangle(0, heightmid-75, 75,75);
 
-
         board = new Board(widthmid, heightmid);
         Boards.put(2, board.makeTwoPlayerMap());
-        Boards.put(4, board.makeFourPlayerBoard());
+        Boards.put(4, board.makeFourPlayerMap());
+        Boards.put(6, board.makeSixPlayerMap());
+        Boards.put(8, board.makeEightPlayerMap());
 
         for (int i = 1; i <= numPlayers; i++) {
             Player player = new Player(Boards.get(numPlayers).get(i));
