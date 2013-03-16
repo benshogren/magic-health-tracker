@@ -141,39 +141,6 @@ public class HealthScreen implements Screen {
         }
     }
 
-    private float ratio(float lower, float upper, float current) {
-        return Math.abs((current-lower)/(upper-lower)-1);
-    }
-
-    private float findRatio(float lower, float upper, float percent) {
-        return ((upper-lower) * (percent)) + lower;
-    }
-
-    private float findGradient(float colorLower, float colorUpper, float healthLower, float healthUpper, int health, boolean inverse) {
-        if (inverse ) {
-            return findRatio(colorLower, colorUpper, ratio(healthLower, healthUpper, health));
-        }
-        return findRatio(colorLower, colorUpper, Math.abs(ratio(healthLower, healthUpper, health)-1));
-    }
-
-    private void backgroundGradiant (int health, Rectangle pos){
-        float maxRed = 0.6f;
-        float maxGreen = 0.6f;
-        if(health > 20){
-            batch.setColor(0, maxGreen, 0, 1.0f);
-        } else if(health <= 20 && health > 14){
-            batch.setColor( findGradient(0, maxRed/2, 15, 20, health, true), maxGreen, 0, 1.0f);
-        } else if(health < 15 && health > 9){
-            batch.setColor( findGradient(maxRed/2, maxRed, 10, 14, health, true), maxGreen, 0, 1.0f);
-        } else if(health < 10 && health > 4){
-            batch.setColor( maxRed, findGradient(0, maxGreen, 5, 9, health, false), 0, findGradient(0.7f, 1, 5, 9, health, false));
-        } else {
-            batch.setColor(maxRed, 0, 0, findGradient(0, 0.7f, 0, 4, health, false));
-        }
-        batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
-        batch.setColor(1, 1, 1, 1);
-    }
-
     private void colorManager(int health, Rectangle pos){
         HashMap<Integer, Color> map = new HashMap<Integer, Color>();
         map.put(20, new Color(0.0f, 0.6f, 0, 1.0f));
@@ -208,8 +175,6 @@ public class HealthScreen implements Screen {
 
     private void drawPlayer(Player player) {
         Rectangle pos = player.Position;
-        //float percent = getHealthPercent(player.Health);
-        //backgroundGradiant(player.Health, pos);
         colorManager(player.Health,pos);
 
         Sprite num = new Sprite(numImages.get(player.Health));
@@ -231,13 +196,6 @@ public class HealthScreen implements Screen {
         num.draw(batch);
         Rectangle plusR = player.PlusPosition;
         batch.draw(plus, plusR.x, plusR.y, plusR.width, plusR.height);
-    }
-
-    private float getHealthPercent(int health) {
-        if(health > 20){
-            return 1;
-        }
-        return (health*5)/100f;
     }
 
     @Override
