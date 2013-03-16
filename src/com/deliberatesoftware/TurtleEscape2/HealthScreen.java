@@ -139,39 +139,60 @@ public class HealthScreen implements Screen {
                 }
             }
         }
+        counter++;
+        if (counter > counterSize) {
+            if(counter > counterSize*2) { counter = 0; }
+        }
     }
 
     private void colorManager(int health, Rectangle pos){
         HashMap<Integer, Color> map = new HashMap<Integer, Color>();
-        map.put(20, new Color(0.0f, 0.6f, 0, 1.0f));
-        map.put(19, new Color(0.1f, 0.6f, 0, 1.0f));
-        map.put(18, new Color(0.2f, 0.6f, 0, 1.0f));
-        map.put(17, new Color(0.3f, 0.6f, 0, 1.0f));
-        map.put(16, new Color(0.4f, 0.6f, 0, 1.0f));
-        map.put(15, new Color(0.5f, 0.6f, 0, 1.0f));
-        map.put(14, new Color(0.6f, 0.6f, 0, 1.0f));
-        map.put(13, new Color(0.6f, 0.6f, 0, 1.0f));
-        map.put(12, new Color(0.6f, 0.5f, 0, 1.0f));
-        map.put(11, new Color(0.6f, 0.4f, 0, 1.0f));
-        map.put(10, new Color(0.6f, 0.3f, 0, 1.0f));
-        map.put( 9, new Color(0.6f, 0.2f, 0, 1.0f));
-        map.put( 8, new Color(0.6f, 0.1f, 0, 1.0f));
-        map.put( 7, new Color(0.6f, 0.0f, 0, 1.0f));
-        map.put( 6, new Color(0.5f, 0.0f, 0, 1.0f));
-        map.put( 5, new Color(0.4f, 0.0f, 0, 1.0f));
-        map.put( 4, new Color(0.3f, 0.0f, 0, 1.0f));
-        map.put( 3, new Color(0.2f, 0.0f, 0, 1.0f));
-        map.put( 2, new Color(0.1f, 0.0f, 0, 1.0f));
-        map.put( 1, new Color(0.0f, 0.0f, 0, 1.0f));
+        map.put(20, new Color(0.0f, 0.6f, 0, 1));
+        map.put(19, new Color(0.1f, 0.6f, 0, 1));
+        map.put(18, new Color(0.2f, 0.6f, 0, 1));
+        map.put(17, new Color(0.3f, 0.6f, 0, 1));
+        map.put(16, new Color(0.4f, 0.6f, 0, 1));
+        map.put(15, new Color(0.5f, 0.6f, 0, 1));
+        map.put(14, new Color(0.6f, 0.6f, 0, 1));
+        map.put(13, new Color(0.6f, 0.6f, 0, 1));
+        map.put(12, new Color(0.6f, 0.5f, 0, 1));
+        map.put(11, new Color(0.6f, 0.4f, 0, 1));
+        map.put(10, new Color(0.6f, 0.3f, 0, 1));
+        map.put( 9, new Color(0.6f, 0.2f, 0, 1));
+        map.put( 8, new Color(0.6f, 0.1f, 0, 1));
+        map.put( 7, new Color(0.6f, 0.0f, 0, 1));
+        map.put( 6, new Color(0.5f, 0.0f, 0, 1));
+        map.put( 5, new Color(0.4f, 0.0f, 0, 1));
+        map.put( 4, new Color(0.3f, 0.0f, 0, 1));
+        map.put( 3, new Color(0.2f, 0.0f, 0, 1));
+        map.put( 2, new Color(0.1f, 0.0f, 0, 1));
+        map.put( 1, new Color(0.0f, 0.0f, 0, 1));
         map.put( 0, new Color(0.0f, 0f, 0, 0));
         if(health > 20){
             batch.setColor(new Color(0, 0.6f, 0, 1));
         } else {
-            batch.setColor(map.get(health));
+            if (health < 5) {
+                if (counter > counterSize) {
+                    batch.setColor(new Color(0.3f, 0, 0, heartRatio()));
+                } else {
+                    Color c = map.get(health);
+                    batch.setColor(c.r, c.g, c.b, heartRatio());
+                }
+            } else {
+                batch.setColor(map.get(health));
+            }
         }
         batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
         batch.setColor(1, 1, 1, 1);
     }
+    private float heartRatio() {
+        if (counter > counterSize) {
+            return Math.abs(((counter-counterSize)/counterSize)-1);
+        }
+        return counter/counterSize;
+    }
+    private int counter = 0;
+    private final int counterSize = 30;
 
     private void drawPlayer(Player player) {
         Rectangle pos = player.Position;
