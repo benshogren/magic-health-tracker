@@ -1,14 +1,15 @@
 package com.deliberatesoftware.TurtleEscape2;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -41,6 +42,7 @@ public class HealthScreen implements Screen {
     private int pulse = 0;
     private TurtleEscape2 game;
     private Texture bg;
+    private ShapeRenderer shapeRenderer;
 
     public HealthScreen ( TurtleEscape2 game, int gameSize ) {
         this.game = game;
@@ -52,7 +54,7 @@ public class HealthScreen implements Screen {
         // load the images for the droplet and the bucket, 48x48 pixels each
         dropImage = new Texture(Gdx.files.internal("drop.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
-        bgColor = new Texture(Gdx.files.internal("health.png"));
+        bgColor = new Texture(Gdx.files.internal("health2.png"));
         bg = new Texture(Gdx.files.internal("Untitled.png"));
         for (int i = 0; i <= 33; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
@@ -62,6 +64,7 @@ public class HealthScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 480, 800);
         batch = new SpriteBatch();
+        shapeRenderer = new ShapeRenderer();
 
         // create the raindrops array and spawn the first raindrop
         //font = new BitmapFont();
@@ -105,6 +108,7 @@ public class HealthScreen implements Screen {
         // tell the SpriteBatch to render in the
         // coordinate system specified by the camera.
         batch.setProjectionMatrix(camera.combined);
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
         batch.begin();
         for(int i = 1; i<=numPlayers;i++) {
@@ -126,17 +130,10 @@ public class HealthScreen implements Screen {
                     if (p.PlusPosition.contains(touchPos.x, touchPos.y)) {
                         if(p.Health < 33) {
                             p.Health++;
-                            Gdx.input.vibrate(75);
                         }
                     } else {
                         if(p.Health > 0) {
                             p.Health--;
-                            if (p.Health < 6) {
-                                long[] d = {0, 75, 75, 75};
-                                Gdx.input.vibrate(d, -1);
-                            } else {
-                                Gdx.input.vibrate(75);
-                            }
                         }
                     }
                 }
@@ -144,12 +141,76 @@ public class HealthScreen implements Screen {
         }
     }
 
-    private void drawPlayer(Player player) {
-        Rectangle pos = player.Position;
-        float percent = getHealthPercent(player.Health);
-        batch.setColor(0, 1, 0, percent);
+    private float ratio(float lower, float upper, float current) {
+        return Math.abs((current-lower)/(upper-lower)-1);
+    }
+
+    private float findRatio(float lower, float upper, float percent) {
+        return ((upper-lower) * (percent)) + lower;
+    }
+
+    private float findGradient(float colorLower, float colorUpper, float healthLower, float healthUpper, int health, boolean inverse) {
+        if (inverse ) {
+            return findRatio(colorLower, colorUpper, ratio(healthLower, healthUpper, health));
+        }
+        return findRatio(colorLower, colorUpper, Math.abs(ratio(healthLower, healthUpper, health)-1));
+    }
+
+    private void backgroundGradiant (int health, Rectangle pos){
+        float maxRed = 0.6f;
+        float maxGreen = 0.6f;
+        if(health > 20){
+            batch.setColor(0, maxGreen, 0, 1.0f);
+        } else if(health <= 20 && health > 14){
+            batch.setColor( findGradient(0, maxRed/2, 15, 20, health, true), maxGreen, 0, 1.0f);
+        } else if(health < 15 && health > 9){
+            batch.setColor( findGradient(maxRed/2, maxRed, 10, 14, health, true), maxGreen, 0, 1.0f);
+        } else if(health < 10 && health > 4){
+            batch.setColor( maxRed, findGradient(0, maxGreen, 5, 9, health, false), 0, findGradient(0.7f, 1, 5, 9, health, false));
+        } else {
+            batch.setColor(maxRed, 0, 0, findGradient(0, 0.7f, 0, 4, health, false));
+        }
         batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
         batch.setColor(1, 1, 1, 1);
+    }
+
+    private void colorManager(int health, Rectangle pos){
+        HashMap<Integer, Color> map = new HashMap<Integer, Color>();
+        map.put(20, new Color(0.0f, 0.6f, 0, 1.0f));
+        map.put(19, new Color(0.1f, 0.6f, 0, 1.0f));
+        map.put(18, new Color(0.2f, 0.6f, 0, 1.0f));
+        map.put(17, new Color(0.3f, 0.6f, 0, 1.0f));
+        map.put(16, new Color(0.4f, 0.6f, 0, 1.0f));
+        map.put(15, new Color(0.5f, 0.6f, 0, 1.0f));
+        map.put(14, new Color(0.6f, 0.6f, 0, 1.0f));
+        map.put(13, new Color(0.6f, 0.6f, 0, 1.0f));
+        map.put(12, new Color(0.6f, 0.5f, 0, 1.0f));
+        map.put(11, new Color(0.6f, 0.4f, 0, 1.0f));
+        map.put(10, new Color(0.6f, 0.3f, 0, 1.0f));
+        map.put( 9, new Color(0.6f, 0.2f, 0, 1.0f));
+        map.put( 8, new Color(0.6f, 0.1f, 0, 1.0f));
+        map.put( 7, new Color(0.6f, 0.0f, 0, 1.0f));
+        map.put( 6, new Color(0.5f, 0.0f, 0, 1.0f));
+        map.put( 5, new Color(0.4f, 0.0f, 0, 1.0f));
+        map.put( 4, new Color(0.3f, 0.0f, 0, 1.0f));
+        map.put( 3, new Color(0.2f, 0.0f, 0, 1.0f));
+        map.put( 2, new Color(0.1f, 0.0f, 0, 1.0f));
+        map.put( 1, new Color(0.0f, 0.0f, 0, 1.0f));
+        map.put( 0, new Color(0.0f, 0f, 0, 0));
+        if(health > 20){
+            batch.setColor(new Color(0, 0.6f, 0, 1));
+        } else {
+            batch.setColor(map.get(health));
+        }
+        batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
+        batch.setColor(1, 1, 1, 1);
+    }
+
+    private void drawPlayer(Player player) {
+        Rectangle pos = player.Position;
+        //float percent = getHealthPercent(player.Health);
+        //backgroundGradiant(player.Health, pos);
+        colorManager(player.Health,pos);
 
         Sprite num = new Sprite(numImages.get(player.Health));
         int xCenter;
