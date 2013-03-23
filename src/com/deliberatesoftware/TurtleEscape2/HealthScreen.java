@@ -46,10 +46,12 @@ public class HealthScreen implements Screen {
     private Rectangle resetButton;
     private boolean showResetDialog = false;
     private Texture resetDialogImage;
+    private Texture playerHighlight;
 
     public HealthScreen ( TurtleEscape2 game, int gameSize ) {
         this.game = game;
         this.numPlayers = gameSize;
+        this.highlightdPlayer = 1 + (int)(Math.random()*numPlayers);
     }
 
     @Override
@@ -59,6 +61,7 @@ public class HealthScreen implements Screen {
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         bgColor = new Texture(Gdx.files.internal("health2.png"));
         bg = new Texture(Gdx.files.internal("Untitled.png"));
+        playerHighlight = new Texture(Gdx.files.internal("highlight.png"));
         resetDialogImage = new Texture(Gdx.files.internal("resetDialogue.png"));
         for (int i = 0; i <= 33; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
@@ -116,7 +119,7 @@ public class HealthScreen implements Screen {
         // drawing
         batch.begin();
         for(int i = 1; i<=numPlayers;i++) {
-            drawPlayer(Players.get(i));
+            drawPlayer(Players.get(i), (highlightdPlayer == i));
         }
         if (showResetDialog) {
             batch.draw(resetDialogImage, widthmid-128, heightmid-128, 256, 256);
@@ -129,6 +132,7 @@ public class HealthScreen implements Screen {
                 currentDirection = convertToDirection(listener.currentFling);
                 listener.hadFling = false;
             } else if (listener.hadTap) {
+                areRolling = false;
                 Vector3 touchPos = listener.lastTap;
                 listener.hadTap = false;
                 camera.unproject(touchPos);
@@ -163,15 +167,33 @@ public class HealthScreen implements Screen {
                     showResetDialog = false;
                 }
             }
-            // listen for yes/no
         }
         counter++;
         if (counter > counterSize) {
             if(counter > counterSize*2) { counter = 0; }
         }
+        if(areRolling){
+            rollCounter++;
+            if (rollCounter == rollSpeed) {
+                rollSpeed += 4;
+                highlightdPlayer++;
+                if (highlightdPlayer > numPlayers) {
+                   highlightdPlayer = 1;
+                }
+                rollCounter = 0;
+            }
+            if (rollSpeed > 40) {
+                areRolling = false;
+            }
+        }
     }
 
-    private void colorManager(int health, Rectangle pos){
+    private int rollCounter = 0;
+    private boolean areRolling = true;
+    private int rollSpeed = 5;
+    private int highlightdPlayer = 1;
+
+    private void colorManager(int health, Rectangle pos, boolean highlightPlayer){
         HashMap<Integer, Color> map = new HashMap<Integer, Color>();
         map.put(20, new Color(0.0f, 0.6f, 0, 1));
         map.put(19, new Color(0.1f, 0.6f, 0, 1));
@@ -210,6 +232,9 @@ public class HealthScreen implements Screen {
         }
         batch.draw(bgColor, pos.x, pos.y, pos.width, pos.height);
         batch.setColor(1, 1, 1, 1);
+        if (health == 20 && highlightPlayer && areRolling) {
+            batch.draw(playerHighlight, pos.x, pos.y, pos.width, pos.height);
+        }
     }
     private float heartRatio() {
         if (counter > counterSize) {
@@ -220,9 +245,9 @@ public class HealthScreen implements Screen {
     private int counter = 0;
     private final int counterSize = 30;
 
-    private void drawPlayer(Player player) {
+    private void drawPlayer(Player player, boolean highlightPlayer) {
         Rectangle pos = player.Position;
-        colorManager(player.Health,pos);
+        colorManager(player.Health,pos, highlightPlayer);
 
         Sprite num = new Sprite(numImages.get(player.Health));
         int xCenter;
