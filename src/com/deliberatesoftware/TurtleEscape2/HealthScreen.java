@@ -37,12 +37,15 @@ public class HealthScreen implements Screen {
     private Map<Integer, Player> Players = new HashMap<Integer, Player>();
     private Map<Integer, Map<Integer, Rectangle>> Boards = new HashMap<Integer, Map<Integer, Rectangle>>();
     private int widthmid = 480/2;
-    private int heightmid = 800/2;
+    private int heightmid = 750/2;
     private Rotator.Direction currentDirection = Rotator.Direction.South;
     private int pulse = 0;
     private TurtleEscape2 game;
     private Texture bg;
     private ShapeRenderer shapeRenderer;
+    private Rectangle resetButton;
+    private boolean showResetDialog = false;
+    private Texture resetDialogImage;
 
     public HealthScreen ( TurtleEscape2 game, int gameSize ) {
         this.game = game;
@@ -56,6 +59,7 @@ public class HealthScreen implements Screen {
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         bgColor = new Texture(Gdx.files.internal("health2.png"));
         bg = new Texture(Gdx.files.internal("Untitled.png"));
+        resetDialogImage = new Texture(Gdx.files.internal("resetDialogue.png"));
         for (int i = 0; i <= 33; i ++){
             numImages.put(i, new Texture(Gdx.files.internal("numbers/"+i+".png")));
         }
@@ -73,8 +77,7 @@ public class HealthScreen implements Screen {
 
         font = new BitmapFont(Gdx.files.internal("test.fnt"),
                 Gdx.files.internal("test.png"), false);
-        topButton = new Rectangle(0, (heightmid*2)-75, 75,75);
-        bottomButton = new Rectangle(0, heightmid-75, 75,75);
+        resetButton = new Rectangle(0, 750, 480, 50);
 
         board = new Board(widthmid, heightmid);
         Boards.put(1, board.makeOnePlayerMap());
@@ -110,34 +113,57 @@ public class HealthScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         shapeRenderer.setProjectionMatrix(camera.combined);
 
+        // drawing
         batch.begin();
         for(int i = 1; i<=numPlayers;i++) {
             drawPlayer(Players.get(i));
         }
+        if (showResetDialog) {
+            batch.draw(resetDialogImage, widthmid-128, heightmid-128, 256, 256);
+        }
         batch.end();
 
         // process user input
-        if (listener.hadFling) {
-            currentDirection = convertToDirection(listener.currentFling);
-            listener.hadFling = false;
-        } else if (listener.hadTap) {
-            Vector3 touchPos = listener.lastTap;
-            listener.hadTap = false;
-            camera.unproject(touchPos);
-            for(int i=1;i<=numPlayers;i++) {
-                Player p = Players.get(i);
-                if (p.Position.contains(touchPos.x, touchPos.y)) {
-                    if (p.PlusPosition.contains(touchPos.x, touchPos.y)) {
-                        if(p.Health < 33) {
-                            p.Health++;
-                        }
-                    } else {
-                        if(p.Health > 0) {
-                            p.Health--;
+        if(showResetDialog == false){
+            if (listener.hadFling) {
+                currentDirection = convertToDirection(listener.currentFling);
+                listener.hadFling = false;
+            } else if (listener.hadTap) {
+                Vector3 touchPos = listener.lastTap;
+                listener.hadTap = false;
+                camera.unproject(touchPos);
+                if(resetButton.contains(touchPos.x, touchPos.y)) {
+                   showResetDialog = true;
+                }
+                for(int i=1;i<=numPlayers;i++) {
+                    Player p = Players.get(i);
+                    if (p.Position.contains(touchPos.x, touchPos.y)) {
+                        if (p.PlusPosition.contains(touchPos.x, touchPos.y)) {
+                            if(p.Health < 33) {
+                                p.Health++;
+                            }
+                        } else {
+                            if(p.Health > 0) {
+                                p.Health--;
+                            }
                         }
                     }
                 }
             }
+        } else {
+            if (listener.hadTap) {
+                Vector3 touchPos = listener.lastTap;
+                listener.hadTap = false;
+                camera.unproject(touchPos);
+                Rectangle yes = new Rectangle(widthmid-128, heightmid-128, 128, 128);
+                Rectangle no = new Rectangle(widthmid, heightmid-128, 128, 128);
+                if (yes.contains(touchPos.x, touchPos.y)) {
+                    game.setScreen(new ChoosePlayersScreen(game));
+                } else if (no.contains(touchPos.x, touchPos.y)) {
+                    showResetDialog = false;
+                }
+            }
+            // listen for yes/no
         }
         counter++;
         if (counter > counterSize) {
